@@ -138,6 +138,22 @@ public enum KeyboardShortcuts {
 			userDefaults.removeObject(forKey: key)
 		}
 	}
+	
+	
+	// MARK: WIP #12
+	public static func unregisterUnknown(known: [KeyboardShortcuts.Name]) {
+		CarbonKeyboardShortcuts.unregisterAll()
+		registeredShortcuts.removeAll()
+		
+		// remove user defaults too
+		let userDefaults = UserDefaults.standard
+
+		for key in userDefaults.dictionaryRepresentation().keys where key.hasPrefix("KeyboardShortcuts_") {
+			userDefaults.removeObject(forKey: key)
+		}
+	}
+	//
+	
 
 	static func initialize() {
 		guard !isInitialized else {

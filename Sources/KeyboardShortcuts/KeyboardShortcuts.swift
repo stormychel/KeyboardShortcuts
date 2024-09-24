@@ -139,24 +139,22 @@ public enum KeyboardShortcuts {
 		}
 	}
 	
-	
-	// MARK: WIP #12
+	/// Unregisters any keyboard shortcuts that are not part of the known shortcuts.
+	///
+	/// This static method takes an array of known shortcut names (`KeyboardShortcuts.Name`) and attempts to unregister any shortcuts
+	/// that are not recognized. The process involves building an array of known `Shortcut` objects from the provided shortcut names
+	/// and then comparing them against the currently registered shortcuts. If a registered shortcut is not found in the list of known
+	/// shortcuts, it will be unregistered from both `CarbonKeyboardShortcuts` and `KeyboardShortcuts`. The method also attempts to find
+	/// the corresponding shortcut name and removes it from the user's defaults.
+	///
+	/// - Parameter knownShortcutNames: An array of `KeyboardShortcuts.Name` representing the shortcuts that should remain registered.
+	/// - Note: This function will post a notification when a shortcut is unregistered, signaling that the shortcut has changed.
 	public static func unregisterUnknownShortcuts(knownShortcutNames: [KeyboardShortcuts.Name]) {
-		print("unregisterUnknownShortcuts() - knownShortcutNames.count: \(knownShortcutNames.count)")
-		
 		var knownShortcuts: [Shortcut] = []
 
-		// MARK: original code, not what we want to do here - #12
-//		CarbonKeyboardShortcuts.unregisterAll() // original code, not what we want to do here
-//		registeredShortcuts.removeAll() //
-		//
-		
 		// build array "knownShortcuts" - [Shortcut] - out of knownShortcutNames
 		for knownShortcutName in knownShortcutNames {
-			print("unregisterUnknownShortcuts() - procesing knownShortcutName: \(knownShortcutName)")
-			
 			if let knownShortcut = knownShortcutName.shortcut {
-				print("unregisterUnknownShortcuts() - knownShortcut: \(knownShortcut)")
 				knownShortcuts.append(knownShortcut)
 			} else {
 				print("unregisterUnknownShortcuts() - knownShortcutName: \(knownShortcutName) has no shortcut, skipping")
@@ -165,35 +163,23 @@ public enum KeyboardShortcuts {
 		
 		// if registeredShortcut is not known, remove it
 		for registeredShortcut in registeredShortcuts {
-			print("unregisterUnknownShortcuts() - processing registeredShortcut: \(registeredShortcut)")
-						
 			// if registeredShortcut is NOT in knownShortcuts, remove it
 			if !knownShortcuts.contains(registeredShortcut) {
 				print("unregisterUnknownShortcuts() - removing unknown registeredShortcut: \(registeredShortcut)")
-				
-				// MARK: disabled for testing
 				CarbonKeyboardShortcuts.unregister(registeredShortcut)
 				KeyboardShortcuts.unregister(registeredShortcut)
-				//
 				
-				// TODO: Shorcut holds no Name, find it so we can use it here - #400 / #12
+				// a Shorcut holds no Name, retrieve/match from knownShortcutNames
 				if let name = knownShortcutNames.filter({$0.shortcut == registeredShortcut}).first {
 					print("unregisterUnknownShortcuts() - found name: \(name)")
-					
 					KeyboardShortcuts.userDefaultsRemove(name: name)
-					
 					NotificationCenter.default.post(name: .shortcutByNameDidChange, object: nil, userInfo: ["name": name])
 				}
-				//
-				
 			} else {
 				print("unregisterUnknownShortcuts() - registeredShortcut: \(registeredShortcut) is in knownShortcuts, skipping")
 			}
 		}
-		//
 	}
-	//
-	
 
 	static func initialize() {
 		guard !isInitialized else {

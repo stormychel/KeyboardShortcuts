@@ -176,8 +176,11 @@ public enum KeyboardShortcuts {
 				
 				
 				// TODO: Shorcut holds no Name, find it so we can use it here - #400 / #12
-//				KeyboardShortcuts.userDefaultsRemove(name: registeredShortcut.name)
+				let name: KeyboardShortcuts.Name? = registeredShortcut.Name
+				KeyboardShortcuts.userDefaultsRemove(name: registeredShortcut.name)
+				NotificationCenter.default.post(name: .shortcutByNameDidChange, object: nil, userInfo: ["name": name])
 				//
+				
 				
 			} else {
 				print("unregisterUnknownShortcuts() - registeredShortcut: \(registeredShortcut) is in knownShortcuts, skipping")

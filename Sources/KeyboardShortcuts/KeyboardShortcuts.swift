@@ -171,16 +171,20 @@ public enum KeyboardShortcuts {
 			if !knownShortcuts.contains(registeredShortcut) {
 				print("unregisterUnknownShortcuts() - removing unknown registeredShortcut: \(registeredShortcut)")
 				
+				// MARK: disabled for testing
 				CarbonKeyboardShortcuts.unregister(registeredShortcut)
 				KeyboardShortcuts.unregister(registeredShortcut)
-				
-				
-				// TODO: Shorcut holds no Name, find it so we can use it here - #400 / #12
-				let name: KeyboardShortcuts.Name? = registeredShortcut.Name
-				KeyboardShortcuts.userDefaultsRemove(name: registeredShortcut.name)
-				NotificationCenter.default.post(name: .shortcutByNameDidChange, object: nil, userInfo: ["name": name])
 				//
 				
+				// TODO: Shorcut holds no Name, find it so we can use it here - #400 / #12
+				if let name = knownShortcutNames.filter({$0.shortcut == registeredShortcut}).first {
+					print("unregisterUnknownShortcuts() - found name: \(name)")
+					
+					KeyboardShortcuts.userDefaultsRemove(name: name)
+					
+					NotificationCenter.default.post(name: .shortcutByNameDidChange, object: nil, userInfo: ["name": name])
+				}
+				//
 				
 			} else {
 				print("unregisterUnknownShortcuts() - registeredShortcut: \(registeredShortcut) is in knownShortcuts, skipping")

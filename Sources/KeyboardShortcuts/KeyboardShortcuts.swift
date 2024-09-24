@@ -141,16 +141,49 @@ public enum KeyboardShortcuts {
 	
 	
 	// MARK: WIP #12
-	public static func unregisterUnknown(known: [KeyboardShortcuts.Name]) {
-		CarbonKeyboardShortcuts.unregisterAll()
-		registeredShortcuts.removeAll()
+	public static func unregisterUnknownShortcuts(knownShortcutNames: [KeyboardShortcuts.Name]) {
+		print("unregisterUnknownShortcuts() - knownShortcutNames.count: \(knownShortcutNames.count)")
 		
-		// remove user defaults too
-		let userDefaults = UserDefaults.standard
+		var knownShortcuts: [Shortcut] = []
 
-		for key in userDefaults.dictionaryRepresentation().keys where key.hasPrefix("KeyboardShortcuts_") {
-			userDefaults.removeObject(forKey: key)
+		// MARK: original code, not what we want to do here - #12
+//		CarbonKeyboardShortcuts.unregisterAll() // original code, not what we want to do here
+//		registeredShortcuts.removeAll() //
+		//
+		
+		// build array "knownShortcuts" - [Shortcut] - out of knownShortcutNames
+		for knownShortcutName in knownShortcutNames {
+			print("unregisterUnknownShortcuts() - procesing knownShortcutName: \(knownShortcutName)")
+			
+			if let knownShortcut = knownShortcutName.shortcut {
+				print("unregisterUnknownShortcuts() - knownShortcut: \(knownShortcut)")
+				knownShortcuts.append(knownShortcut)
+			} else {
+				print("unregisterUnknownShortcuts() - knownShortcutName: \(knownShortcutName) has no shortcut, skipping")
+			}
 		}
+		
+		// if registeredShortcut is not known, remove it
+		for registeredShortcut in registeredShortcuts {
+			print("unregisterUnknownShortcuts() - processing registeredShortcut: \(registeredShortcut)")
+						
+			// if registeredShortcut is NOT in knownShortcuts, remove it
+			if !knownShortcuts.contains(registeredShortcut) {
+				print("unregisterUnknownShortcuts() - removing unknown registeredShortcut: \(registeredShortcut)")
+				
+				CarbonKeyboardShortcuts.unregister(registeredShortcut)
+				KeyboardShortcuts.unregister(registeredShortcut)
+				
+				
+				// TODO: Shorcut holds no Name, find it so we can use it here - #400 / #12
+//				KeyboardShortcuts.userDefaultsRemove(name: registeredShortcut.name)
+				//
+				
+			} else {
+				print("unregisterUnknownShortcuts() - registeredShortcut: \(registeredShortcut) is in knownShortcuts, skipping")
+			}
+		}
+		//
 	}
 	//
 	
